@@ -1,3 +1,3 @@
 token: 
-  - botToken: # The token of the actual bot you made on the developer dashboard, not a selfbot
-  - selfbotToken: # The token of the selfbot to grind with
+  - botToken: "token here" # The token of the actual bot you made on the developer dashboard, not a selfbot
+  - selfbotToken: "token here" # The token of the selfbot to grind with
