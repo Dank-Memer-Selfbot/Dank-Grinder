@@ -23,7 +23,7 @@ class _grinderConfig:
 class _sellConfig:
     """A class that contains the sell configuration."""
 
-    def __init__(self, sellConfig: Dict[str, Any[int, str, bool]]) -> None:
+    def __init__(self, sellConfig: Dict[str, Any]) -> None:
         """Initializes the sell config."""
         self.sellItems: bool = sellConfig["sellItems"]
         self.doNotSell: str = sellConfig["type"]
@@ -32,7 +32,7 @@ class _sellConfig:
 class _moneyConfig:
     """A class that contains the money configuration."""
 
-    def __init__(self, money: Dict[str, Any[str, int, bool]]) -> None:
+    def __init__(self, money: Dict[str, Any]) -> None:
         """Initializes the money config."""
         self.transfer: bool = money["transfer"]
         self.ownerId: int = int(money["owner"])
@@ -43,9 +43,9 @@ class _config:
 
     def __init__(
         self,
-        grinderConfig: Dict[str, Any[str, int]],
-        sellConfig: Dict[str, Any[str, int]],
-        moneyConfig: Dict[str, Any[str, int]],
+        grinderConfig: Dict[str, Any],
+        sellConfig: Dict[str, Any],
+        moneyConfig: Dict[str, Any],
     ) -> None:
         """Initializes the config class."""
         self.grinderConfig: _grinderConfig = _grinderConfig(grinderConfig)
