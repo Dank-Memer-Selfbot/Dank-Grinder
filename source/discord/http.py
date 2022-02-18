@@ -256,6 +256,7 @@ class HTTPClient:
         *,
         files: Optional[Sequence[File]] = None,
         form: Optional[Iterable[Dict[str, Any]]] = None,
+        sleep: Optional[bool] = False,
         **kwargs: Any,
     ) -> Any:
         bucket = route.bucket
@@ -287,7 +288,8 @@ class HTTPClient:
             'X-Debug-Options': 'bugReporterEnabled',
             'X-Super-Properties': self.encoded_super_properties
         }
-
+        if sleep:
+            await asyncio.sleep(0.3)
         # Header modification
         if self.token is not None and kwargs.get('auth', True):
             headers['Authorization'] = self.token
@@ -1975,8 +1977,8 @@ class HTTPClient:
         except HTTPException as e:
             if form_data:
                 form = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
-                return self.request(Route('POST', '/interactions'), form=form)
+                return self.request(Route('POST', '/interactions'), form=form, sleep=True)
             else:
-                return self.request(Route('POST', '/interactions'), json=payload)
+                return self.request(Route('POST', '/interactions'), json=payload, sleep=True)
             
 
