@@ -1,8 +1,15 @@
+"""Parses Messages, responds to them and calls the appropriate events."""
+
+# pylint: disable=invalid-name, line-too-long, wrong-import-order, wrong-import-position, multiple-imports
+
+import sys, os
+
+sys.path.append(os.getcwd() + "/..")
 import discord, re, random
-from typing import List, Dict, Union
+from typing import Union, Dict, Any
 from discord.ext import commands
 
-# pylint: disable=invalid-name
+NestedDictType = Dict[str, Union[None, int, str, bool, list, Dict[str, Any]]]
 
 
 class _converter:
@@ -10,7 +17,7 @@ class _converter:
     A class that converts a dictionary into a class, the dictionary keys being the class attributes.
     """
 
-    def __init__(self, dic: Dict[str, Union[str, int, float]]) -> None:
+    def __init__(self, dic: NestedDictType) -> None:
         """Initialize the class with the dictionary."""
         for key, value in dic.items():
             if isinstance(value, dict):
@@ -40,7 +47,7 @@ class Parser(commands.Cog):
             return
             # We only want to respond to messages in the channel
 
-        data = {"event": False, "help": False}
+        data: NestedDictType = {"event": False, "help": False}
 
         if message.reference is None:
             return
@@ -61,8 +68,8 @@ class Parser(commands.Cog):
             embed = message.content.embeds[0]
             if embed.title.lower().endswith("command"):
                 data["help"] = True
-                data = _converter(data)
-                self.bot.dispatch("dank_help", data)
+                convertedData = _converter(data)
+                self.bot.dispatch("dank_help", convertedData)
                 return
             # Means that the embed isn't a help embed and is the actual response
 
@@ -71,23 +78,25 @@ class Parser(commands.Cog):
                 data["help"] = False
                 data["type"] = "beg"
                 # example description: "Oh you poor little beggar, take ⏣ 1,613 and a :dankCandy: Candy"
-                # We only want the number (1613) and any items gained
+                # We only want the number (1613) and Union items gained
                 description = embed.description.replace(",", "")
-                gained = {
-                    "money": int,
-                    "items": List[str],
-                    "bonus": Dict[str, int],
+                gained: NestedDictType = {
+                    "money": None,
+                    "items": None,
+                    "bonus": None,
                 }
                 # use the u'⏣ [0-9]+' regex to find the money gained
                 try:
                     money = re.findall("⏣ [0-9]+", description)[0].split(" ")[1]
                 except IndexError:
-                    # Only called when the regex doesn't find anything, which it can't in cases like
+                    # Only called when the regex doesn't find Unionthing, which it can't in cases like
                     # "HeRe In AmErIcA wE dOnT dO cOmMuNiSm"
                     # Which mains no money was gained
                     data["gained"] = False
-                    data = _converter(data)
-                    self.bot.dispatch("dank_beg", data)
+                    convertedData = _converter(data)
+                    self.bot.dispatch("dank_beg", convertedData)
+                    del convertedData
+                    return
                 # use the u'[a-zA-Z]+' regex to find the items gained
                 items = (
                     description.split(":")[1]
@@ -98,7 +107,7 @@ class Parser(commands.Cog):
                 )
                 # Splits "Oh you poor little beggar, take ⏣ 1,613 and a :dankCandy: Candy" into a list
                 # ["Oh you poor little beggar, take ⏣ 1,613 and a ", "dankCandy: Candy"], then splits the second element into a list
-                # ["dankCandy", "Candy"], then the quotes are removed from "Candy" and so are any other emojis.
+                # ["dankCandy", "Candy"], then the quotes are removed from "Candy" and so are Union other emojis.
 
                 footer = embed.footer.text
                 # Example footer: Multi Bonus: +81% (⏣ 572)
@@ -106,7 +115,10 @@ class Parser(commands.Cog):
                 foundBonus = re.findall(r"\+[0-9]+% \(⏣ [0-9]+\)", footer)[0].split(
                     " "
                 )[0]
-                bonus = {"percent": int, "money": int}
+                bonus: NestedDictType = {
+                    "percent": None,
+                    "money": None,
+                }
                 foundBonus = (
                     foundBonus.replace("+", "")
                     .replace("%", "")
@@ -121,8 +133,8 @@ class Parser(commands.Cog):
                 gained["money"] = int(money)
                 gained["items"] = items
                 data["gained"] = gained
-                data = _converter(data)
-                self.bot.dispatch("dank_beg", data)
+                convertedData = _converter(data)
+                self.bot.dispatch("dank_beg", convertedData)
 
             if "hl" in command:
                 # Parsing highlow command
@@ -139,7 +151,6 @@ class Parser(commands.Cog):
                 )
                 components = message.components
                 low = components[0].children[0]
-                jackpot = components[0].children[1]
                 high = components[0].children[2]
                 # This is a game of highlow, we are given a hint between 1 and 100 and we need to guess if the secret number is greater than, smaller than, or is the hint
                 if number == 50:
@@ -171,5 +182,10 @@ class Parser(commands.Cog):
                     data["amount"] = int(
                         re.findall(r"⏣ [0-9]+", description)[0].replace("⏣", "").strip()
                     )
-                data = _converter(data)
-                self.bot.dispatch("dank_highlow", data)
+                convertedData = _converter(data)
+                self.bot.dispatch("dank_highlow", convertedData)
+
+
+def setup(bot: commands.Bot) -> None:
+    """Loads the Parser cog."""
+    bot.add_cog(Parser(bot))
