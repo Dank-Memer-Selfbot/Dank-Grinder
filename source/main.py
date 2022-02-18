@@ -13,7 +13,7 @@ from typing import Any, Dict
 class _grinderConfig:
     """A class that contains the configuration for the grinder."""
 
-    def __init__(self, grinderConfig: Dict[str, Any[int, str]]) -> None:
+    def __init__(self, grinderConfig: Dict[str, Any]) -> None:
         """Initializes the grinder config."""
         self.usePercentage: int = int(grinderConfig["usePercentage"])
         self.channelId: int = int(grinderConfig["channel"])

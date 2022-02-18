@@ -9,6 +9,8 @@ import discord, re, random
 from typing import Union, Dict, Any
 from discord.ext import commands
 import yaml
+
+
 NestedDictType = Dict[str, Union[None, int, str, bool, list, Dict[str, Any]]]
 
 
@@ -40,10 +42,10 @@ class Parser(commands.Cog):
 
     def get_config(self):
         cur_file_dir = os.path.dirname(os.path.abspath(__file__))
-        with open(cur_file_dir+"\scout.yml", "r", encoding="utf-8") as config_file:
+        with open(cur_file_dir + r"\scout.yml", "r", encoding="utf-8") as config_file:
             config = yaml.load(config_file, Loader=yaml.FullLoader)
         return config
-    
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         """Returns the type of the message."""
@@ -170,9 +172,10 @@ class Parser(commands.Cog):
                     await low.click()
                 else:
                     await high.click()
-                newMessage = await self.bot.wait_for(
+                oldMessage, newMessage = await self.bot.wait_for(
                     "message_edit", check=lambda m: m.author == message.author
                 )
+                del oldMessage
                 embed = newMessage.embeds[0]
                 footer = embed.footer.text
                 description = embed.description
@@ -191,38 +194,35 @@ class Parser(commands.Cog):
                     )
                 convertedData = _converter(data)
                 self.bot.dispatch("dank_highlow", convertedData)
-            
+
             if "pm" in command:
                 print("PM")
                 # Parsing pm command
                 description = embed.description
-                # Description example 
+                # Description example
                 # Pick a meme to post to the internet!
-                index = random.randint(0,4)
+                index = random.randint(0, 4)
                 try:
                     await message.components[0].children[index].click()
                 except discord.errors.DiscordServerError:
                     await message.components[0].children[index].click()
                 return
-        
+
         else:
-            """ ======== NO EMBEDS ========= """
+            # This is run when a message doesn't have any embeds
+
             # Crime
             if "crime" in command:
-                print("crime")
-                crime_msg = message.content
-                # Not necessary
-                #if message.content.replace("*","").lower().startswith("what crime"):
-                index = random.randint(0,2)
+                index = random.randint(0, 2)
                 try:
                     await message.components[0].children[index].click()
                 except discord.errors.DiscordServerError:
                     await message.components[0].children[index].click()
                 return
-            
-            if any(x in command for x in ["scout","search"]):
+
+            if any(x in command for x in ["scout", "search"]):
                 compo = message.components[0]
-                labels = [comp.label for comp in compo.children] 
+                labels = [comp.label for comp in compo.children]
                 indices = []
                 label = None
                 for i in self.scout["SCOUT_FIND"]:
@@ -232,8 +232,8 @@ class Parser(commands.Cog):
                         break
                 if indices:
                     print(f"found {label} in {labels}")
-                index = indices[0] if indices else random.randint(0,2)
-                
+                index = indices[0] if indices else random.randint(0, 2)
+
                 try:
                     await message.components[0].children[index].click()
                 except discord.errors.DiscordServerError:
