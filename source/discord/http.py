@@ -1966,8 +1966,17 @@ class HTTPClient:
         return self.request(Route('GET', '/applications/{user_id}/commands', user_id=id))
 
     def interact(self, payload, *, form_data=False) -> Response[None]:
-        if form_data:
-            form = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
-            return self.request(Route('POST', '/interactions'), form=form)
-        else:
-            return self.request(Route('POST', '/interactions'), json=payload)
+        try:
+            if form_data:
+                form = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
+                return self.request(Route('POST', '/interactions'), form=form)
+            else:
+                return self.request(Route('POST', '/interactions'), json=payload)
+        except HTTPException as e:
+            if form_data:
+                form = [{'name': 'payload_json', 'value': utils._to_json(payload)}]
+                return self.request(Route('POST', '/interactions'), form=form)
+            else:
+                return self.request(Route('POST', '/interactions'), json=payload)
+            
+

@@ -202,10 +202,7 @@ class Parser(commands.Cog):
                 # Description example
                 # Pick a meme to post to the internet!
                 index = random.randint(0, 4)
-                try:
-                    await message.components[0].children[index].click()
-                except discord.errors.DiscordServerError:
-                    await message.components[0].children[index].click()
+                await message.components[0].children[index].click()
                 return
 
         else:
@@ -214,11 +211,7 @@ class Parser(commands.Cog):
             # Crime
             if "crime" in command:
                 index = random.randint(0, 2)
-                try:
-                    await message.components[0].children[index].click()
-                except discord.errors.DiscordServerError:
-                    await message.components[0].children[index].click()
-                return
+                await message.components[0].children[index].click()
 
             if any(x in command for x in ["scout", "search"]):
                 compo = message.components[0]
