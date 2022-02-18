@@ -1,3 +1,5 @@
+from discord.errors import DiscordException
+import discord
 class Component():
     def __init__(self, compo):
         self.compo = compo
@@ -8,10 +10,9 @@ class Component():
         if self.labels:
             if label in self.labels:
                 index = self.labels.index(label)
-                await self.compo_child[index].click()
+                try: 
+                    await self.compo_child[index].click()
+                except discord.errors.DiscordServerError:
+                    print("discord fking lagged bro")
             else:
                 print(f"The label [{label}] is not found in [{self.labels}]")
-        else:
-            print('there is no labels')
-            
-        
