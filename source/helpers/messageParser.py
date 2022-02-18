@@ -33,7 +33,14 @@ class Parser(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
         """Returns the type of the message."""
-        data = {"event": bool, "help": bool}
+        if not message.author.bot:
+            return
+            # We only want to respond to bots
+        if message.channel.id != self.bot.config.channelId:
+            return
+            # We only want to respond to messages in the channel
+
+        data = {"event": False, "help": False}
 
         if message.reference is None:
             return
@@ -79,7 +86,8 @@ class Parser(commands.Cog):
                     # "HeRe In AmErIcA wE dOnT dO cOmMuNiSm"
                     # Which mains no money was gained
                     data["gained"] = False
-                    return data
+                    data = _converter(data)
+                    self.bot.dispatch("dank_beg", data)
                 # use the u'[a-zA-Z]+' regex to find the items gained
                 items = (
                     description.split(":")[1]
@@ -95,9 +103,9 @@ class Parser(commands.Cog):
                 footer = embed.footer.text
                 # Example footer: Multi Bonus: +81% (⏣ 572)
                 # regex to find bonus '\+[0-9]+% \(⏣ [0-9]+\)'
-                foundBonus = re.findall("\+[0-9]+% \(⏣ [0-9]+\)", footer)[0].split(" ")[
-                    0
-                ]
+                foundBonus = re.findall(r"\+[0-9]+% \(⏣ [0-9]+\)", footer)[0].split(
+                    " "
+                )[0]
                 bonus = {"percent": int, "money": int}
                 foundBonus = (
                     foundBonus.replace("+", "")
@@ -118,6 +126,7 @@ class Parser(commands.Cog):
 
             if "hl" in command:
                 # Parsing highlow command
+                data["type"] = "dank_highlow"
                 description = embed.description
                 # Description example:
                 # I just chose a secret number between 1 and 100.
@@ -129,8 +138,38 @@ class Parser(commands.Cog):
                     re.findall(r"\*\*[0-9]+\*\*", numberLine)[0].replace("**", "")
                 )
                 components = message.components
+                low = components[0].children[0]
+                jackpot = components[0].children[1]
+                high = components[0].children[2]
                 # This is a game of highlow, we are given a hint between 1 and 100 and we need to guess if the secret number is greater than, smaller than, or is the hint
                 if number == 50:
                     # If the number is 50, we can pick a random choice between above and below
                     if random.randint(0, 1) == 0:
-                        return
+                        await low.click()
+                    else:
+                        await high.click()
+                elif number > 50:
+                    await low.click()
+                else:
+                    await high.click()
+                newMessage = await self.bot.wait_for(
+                    "message_edit", check=lambda m: m.author == message.author
+                )
+                embed = newMessage.embeds[0]
+                footer = embed.footer.text
+                description = embed.description
+                # Gets the embed footer, the footer is loser loser if you lose, the color of the embed can also be checked
+                if "loser" in footer:
+                    data["lost"] = True
+                    data["amount"] = None
+                # example desc when you win
+                # **You won ⏣ 2,197!**
+                # \n
+                # Your hint was **49**. The hidden number was **94**.
+                if "won" in description:
+                    data["won"] = True
+                    data["amount"] = int(
+                        re.findall(r"⏣ [0-9]+", description)[0].replace("⏣", "").strip()
+                    )
+                data = _converter(data)
+                self.bot.dispatch("dank_highlow", data)

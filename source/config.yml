@@ -1,5 +1,3 @@
-token: # Discord unique token
-
 grinderConfig:
   channel: #Channel ID
   type: #levels/money: Whether the bot should grind mainly for growth in money, or for growth in levels

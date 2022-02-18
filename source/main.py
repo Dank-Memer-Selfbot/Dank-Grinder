@@ -1,56 +1,70 @@
-import rich, discord, yaml, aiofiles
+import discord, yaml
 from discord.ext import commands
-from messageparser import *
+from rich.console import Console
+from typing import List, Dict, Union
 
 
 # --- Constants --- #
-class InitBot:
-    def __init__(self):
-        self.config = self.get_config()
-        self.token = self.config["token"]
-        self.ch_cmd = self.config["grinderConfig"]["channel"]
-
-        # --- Initialize bot --- #
-        bot = DiscordBot(self.ch_cmd)
-        bot.run(self.token)
-
-    def get_config(self):
-        with open("config2.yml", "r", encoding="utf-8") as config_file:
-            config = yaml.load(config_file, Loader=yaml.FullLoader)
-        return config
 
 
-class DiscordBot(commands.Bot):
-    def __init__(self, ch_cmd):
-        super().__init__(command_prefix="")
-        self.ch_cmd = ch_cmd
+class _grinderConfig:
+    """A class that contains the configuration for the grinder."""
 
-    async def on_ready(self):
-        print(f"Bot {self.user} is connected to server.")
+    def __init__(self, grinderConfig: Dict[str, Union[int, str]]) -> None:
+        """Initializes the grinder config."""
+        self.usePercentage: int = int(grinderConfig["usePercentage"])
+        self.channelId: int = int(grinderConfig["channel"])
+        self.grindType: Union["levels", "money"] = grinderConfig["type"]
 
-    # --- Events --- #
-    async def on_message(self, message):
-        msg = MessageParser(message)
 
-        if msg.user_id() == self.user:
-            return
+class _sellConfig:
+    """A class that contains the sell configuration."""
 
-        if msg.in_dms():
-            print("this message is in dms")
-        else:
+    def __init__(self, sellConfig: Dict[str, Union[int, str]]) -> None:
+        """Initializes the sell config."""
+        self.sellItems: bool = sellConfig["sellItems"]
+        self.doNotSell: List = sellConfig["type"]
 
-            if msg.embed:
-                title = msg.embed.title
-                desc = msg.embed.description
 
-            if msg.component and msg.channel_id() == self.ch_cmd:
-                if msg.component.labels:
-                    print(msg.component.labels)
-                    # Lets say pls hl
-                    await msg.component.click_label("Lower")
+class _moneyConfig:
+    """A class that contains the money configuration."""
 
-        return
+    def __init__(self, money: Dict[str, Union[str, int]]) -> None:
+        """Initializes the money config."""
+        self.transfer: bool = money["transfer"]
+        self.ownerId: int = int(money["owner"])
+
+
+class _config:
+    """A class that contains the configuration for the bot."""
+
+    def __init__(
+        self,
+        grinderConfig: Dict[str, Union[str, int, float]],
+        sellConfig: Dict[str, Union[str, int, float]],
+        moneyConfig: Dict[str, Union[str, int, float]],
+    ) -> None:
+        """Initializes the config class."""
+        self.grinderConfig: Dict[str, Union[str, int, float]] = _grinderConfig(
+            grinderConfig
+        )
+        self.sellConfig: Dict[str, Union[str, int, float]] = _sellConfig(sellConfig)
+        self.moneyConfig: Dict[str, Union[str, int, float]] = _moneyConfig(moneyConfig)
+
+
+console = Console()
+bot = commands.Bot(command_prefix=">", self_bot=True)
+
+with open("config.yml", "r") as file:
+    config = yaml.safe_load(file)
+with open("./source/config.yml", "r") as file:
+    innerConfig = yaml.safe_load(file)
+bot.token = config["selfbotToken"]
+bot.legitToken = config["botToken"]
+bot.config = _config(
+    innerConfig["grinderConfig"], innerConfig["sell"], innerConfig["money"]
+)
 
 
 if __name__ == "__main__":
-    b = InitBot()
+    bot.run(bot.token)
