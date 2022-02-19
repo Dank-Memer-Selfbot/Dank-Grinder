@@ -3,6 +3,8 @@
 # pylint: disable=invalid-name, line-too-long, wrong-import-order, wrong-import-position, multiple-imports
 import sys, os
 
+from source.helpers import commandParsers
+
 sys.path.append(os.getcwd() + "/..")
 import discord, re, random, commands
 from typing import Union, Dict, Any
@@ -85,14 +87,14 @@ class Parser(commands.Cog):
             # Means that the embed isn't a help embed and is the actual response
 
             if "beg" in command:
-                data = await commands.beg(embed, data)
+                data = await commandParsers.beg(embed, data)
                 convertedData = _converter(data)
                 self.bot.dispatch("dank_beg", convertedData)
                 return
 
             if "hl" in command:
                 # Parsing highlow command
-                data = await commands.highlow(embed, data, message, self.bot)
+                data = await commandParsers.highlow(embed, data, message, self.bot)
                 convertedData = _converter(data)
                 self.bot.dispatch("dank_highlow", convertedData)
                 return
@@ -137,7 +139,7 @@ class Parser(commands.Cog):
 
             # Fishing
             if "fish" in command:
-                data = commands.fish(data, message)
+                data = commandParsers.fish(data, message)
                 convertedData = _converter(data)
                 self.bot.dispatch("dank_fish", convertedData)
                 return
