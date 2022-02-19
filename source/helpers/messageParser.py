@@ -137,6 +137,7 @@ class Parser(commands.Cog):
 
             # Fishing
             if "fish" in command:
+                data = await commands.fish(data, message)
                 convertedData = _converter(data)
                 self.bot.dispatch("dank_fish", convertedData)
                 return
