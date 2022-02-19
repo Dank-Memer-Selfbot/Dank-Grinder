@@ -35,7 +35,7 @@ async def beg(embed: discord.Embed, data: NestedDictType) -> NestedDictType:
         data["gained"] = False
         return data
     # use the u'[a-zA-Z]+' regex to find the items gained
-    items = description.split(":")[1].split(":")[1].strip().replace('"').split()[0]
+    items = description.split(":")[1].split(":")[1].strip().replace('"', '').split()[0]
     # Splits "Oh you poor little beggar, take ⏣ 1,613 and a :dankCandy: Candy" into a list
     # ["Oh you poor little beggar, take ⏣ 1,613 and a ", "dankCandy: Candy"], then splits the second element into a list
     # ["dankCandy", "Candy"], then the quotes are removed from "Candy" and so are Union other emojis.

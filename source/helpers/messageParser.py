@@ -2,11 +2,9 @@
 
 # pylint: disable=invalid-name, line-too-long, wrong-import-order, wrong-import-position, multiple-imports
 import sys, os
-
-from source.helpers import commandParsers
-
 sys.path.append(os.getcwd() + "/..")
-import discord, re, random, commands
+import discord, re, random
+from .commandParsers import commandParsers
 from typing import Union, Dict, Any
 from discord.ext import commands
 import yaml
