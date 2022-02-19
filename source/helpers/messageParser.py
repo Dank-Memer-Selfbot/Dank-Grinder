@@ -1,8 +1,6 @@
 """Parses Messages, responds to them and calls the appropriate events."""
 
 # pylint: disable=invalid-name, line-too-long, wrong-import-order, wrong-import-position, multiple-imports
-
-from lib2to3.pytree import convert
 import sys, os
 
 sys.path.append(os.getcwd() + "/..")
