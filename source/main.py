@@ -7,6 +7,7 @@ from discord.ext import commands
 from rich.console import Console
 from typing import Any, Dict
 from helpers.messageParser import *
+
 # --- Constants --- #
 
 
@@ -53,27 +54,29 @@ class _config:
         self.moneyConfig: _moneyConfig = _moneyConfig(moneyConfig)
 
 
-#console = Console()
-bot = commands.Bot(command_prefix='', self_bot=True)
+# console = Console()
+bot = commands.Bot(command_prefix="", self_bot=True)
+
 
 @bot.event
 async def on_ready():
-    print(f'logged in as {bot.user}')
-    
+    print(f"logged in as {bot.user}")
+
+
 @bot.event
 async def on_message(message):
     # Base Cases
     if message.author == bot.user:
         return
-    
+
+
 cur_file_dir = os.path.dirname(os.path.abspath(__file__))
-with open(cur_file_dir+"/config.yml", "r", encoding="utf-8") as file:
+with open(cur_file_dir + "/config.yml", "r", encoding="utf-8") as file:
     config = yaml.safe_load(file)
 bot.token = config["token"]["selfbotToken"]
 bot.legitToken = config["token"]["botToken"]
-bot.config = _config(
-    config["grinderConfig"], config["sell"], config["money"]
-)
+bot.config = _config(config["grinderConfig"], config["sell"], config["money"])
+
 
 async def use_command(command: str) -> bool:
     """Uses a command
@@ -89,8 +92,9 @@ async def use_command(command: str) -> bool:
         channel = await bot.fetch_channel(bot.config.grinderConfig.channelId)
     if channel is None:
         raise Exception("Channel not found")
-    await channel.send(command)
+    await channel.send(f"pls {command}")
     return True
+
 
 bot.use_command = use_command
 # This allows for easy changeability, especially with dank memer's update coming soon

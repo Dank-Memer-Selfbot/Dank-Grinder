@@ -2,7 +2,9 @@
 
 # pylint: disable=invalid-name, line-too-long, wrong-import-order, wrong-import-position, multiple-imports
 
+from lib2to3.pytree import convert
 import sys, os
+
 sys.path.append(os.getcwd() + "/..")
 import discord, re, random, commands
 from typing import Union, Dict, Any
@@ -134,7 +136,12 @@ class Parser(commands.Cog):
                 index = indices[0] if indices else random.randint(0, 2)
                 await message.components[0].children[index].click()
                 return
-                
+
+            # Fishing
+            if "fish" in command:
+                convertedData = _converter(data)
+                self.bot.dispatch("dank_fish", convertedData)
+                return
 
 
 def setup(bot: commands.Bot) -> None:

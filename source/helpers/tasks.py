@@ -16,6 +16,12 @@ class loop(commands.Cog):
         data = await self.bot.wait_for("dank_beg", timeout=30)
         print(data.__dict__)
 
+    @tasks.loop(seconds=Cooldowns["fish"])
+    async def fish(self) -> None:
+        message = await self.bot.use_command("fish")
+        data = await self.bot.wait_for("dank_fish", timeout=30)
+        print(data.__dict__)
+
 
 def setup(bot: commands.Bot) -> None:
     """Meant for handling tasks, essentially commands that are run at specific intervals."""
