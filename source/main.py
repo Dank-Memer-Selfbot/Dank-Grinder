@@ -75,6 +75,25 @@ bot.config = _config(
     config["grinderConfig"], config["sell"], config["money"]
 )
 
+async def use_command(command: str) -> bool:
+    """Uses a command
+
+    Args:
+        command (str): The command to use.
+
+    Returns:
+        bool: Whether the command was used.
+    """
+    channel = bot.get_channel(bot.config.grinderConfig.channelId)
+    if channel is None:
+        channel = await bot.fetch_channel(bot.config.grinderConfig.channelId)
+    if channel is None:
+        raise Exception("Channel not found")
+    await channel.send(command)
+    return True
+
+bot.use_command = use_command
+# This allows for easy changeability, especially with dank memer's update coming soon
 
 
 if __name__ == "__main__":
