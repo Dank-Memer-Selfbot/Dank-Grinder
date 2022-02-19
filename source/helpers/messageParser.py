@@ -38,7 +38,7 @@ class Parser(commands.Cog):
             bot (commands.Bot): The bot.
         """
         self.scout = self.get_config()
-        self.bot: commands.Bot = bot
+        self.bot = bot
 
     def get_config(self):
         cur_file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,7 +52,7 @@ class Parser(commands.Cog):
         if not message.author.bot:
             return
             # We only want to respond to bots
-        if message.channel.id != self.bot.config.channelId:
+        if message.channel.id != int(self.bot.config.grinderConfig.channelId):
             return
             # We only want to respond to messages in the channel
 
@@ -73,9 +73,11 @@ class Parser(commands.Cog):
         command: str = respondedTo.content.replace("pls", "").strip()
         # Findingg the command
         data["event"] = False
-        if message.content.embeds:
-            embed = message.content.embeds[0]
-            if embed.title.lower().endswith("command"):
+
+        if len(message.embeds)>0:
+            embed = message.embeds[0]
+                
+            if str(embed.title).lower().endswith("command"):
                 data["help"] = True
                 convertedData = _converter(data)
                 self.bot.dispatch("dank_help", convertedData)
@@ -88,7 +90,7 @@ class Parser(commands.Cog):
                 data["type"] = "beg"
                 # example description: "Oh you poor little beggar, take ⏣ 1,613 and a :dankCandy: Candy"
                 # We only want the number (1613) and Union items gained
-                description = embed.description.replace(",", "")
+                description = str(embed.description).replace(",", "")
                 gained: NestedDictType = {
                     "money": None,
                     "items": None,
@@ -159,21 +161,20 @@ class Parser(commands.Cog):
                     re.findall(r"\*\*[0-9]+\*\*", numberLine)[0].replace("**", "")
                 )
                 components = message.components
-                low = components[0].children[0]
-                high = components[0].children[2]
+                low, high = components[0].children[0], components[0].children[2]
                 # This is a game of highlow, we are given a hint between 1 and 100 and we need to guess if the secret number is greater than, smaller than, or is the hint
-                if number == 50:
-                    # If the number is 50, we can pick a random choice between above and below
-                    if random.randint(0, 1) == 0:
-                        await low.click()
-                    else:
-                        await high.click()
-                elif number > 50:
-                    await low.click()
-                else:
-                    await high.click()
+                if number == 50: sent_msg = await components[0].children[random.randint(0,2)].click
+                elif number > 50: sent_msg = await low.click()
+                else: sent_msg = await high.click()
+                
+                """ 
+                Code below having issues with positional arguments for lambda
+                """
                 oldMessage, newMessage = await self.bot.wait_for(
-                    "message_edit", check=lambda m: m.author == message.author
+                    "message_edit", 
+                    check = lambda old,new : old.author.id == message.author.id 
+                    and old.author.id == new.author.id,
+                    timeout = None
                 )
                 del oldMessage
                 embed = newMessage.embeds[0]

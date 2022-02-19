@@ -1,12 +1,12 @@
 """The Main file of the Project."""
 
 # pylint: disable=invalid-name, wrong-import-order, multiple-imports, wrong-import-position
-
+import os
 import discord, yaml
 from discord.ext import commands
 from rich.console import Console
 from typing import Any, Dict
-
+from helpers.messageParser import *
 # --- Constants --- #
 
 
@@ -26,7 +26,7 @@ class _sellConfig:
     def __init__(self, sellConfig: Dict[str, Any]) -> None:
         """Initializes the sell config."""
         self.sellItems: bool = sellConfig["sellItems"]
-        self.doNotSell: str = sellConfig["type"]
+        self.doNotSell: str = sellConfig["doNotSell"]
 
 
 class _moneyConfig:
@@ -53,19 +53,30 @@ class _config:
         self.moneyConfig: _moneyConfig = _moneyConfig(moneyConfig)
 
 
-console = Console()
-bot = commands.Bot(command_prefix=">", self_bot=True)
+#console = Console()
+bot = commands.Bot(command_prefix='', self_bot=True)
 
-with open("config.yml", "r", encoding="utf-8") as file:
+@bot.event
+async def on_ready():
+    print(f'logged in as {bot.user}')
+    
+@bot.event
+async def on_message(message):
+    # Base Cases
+    if message.author == bot.user:
+        return
+    
+cur_file_dir = os.path.dirname(os.path.abspath(__file__))
+with open(cur_file_dir+"/config.yml", "r", encoding="utf-8") as file:
     config = yaml.safe_load(file)
-with open("source/config.yml", "r", encoding="utf-8") as file:
-    innerConfig = yaml.safe_load(file)
 bot.token = config["token"]["selfbotToken"]
 bot.legitToken = config["token"]["botToken"]
 bot.config = _config(
-    innerConfig["grinderConfig"], innerConfig["sell"], innerConfig["money"]
+    config["grinderConfig"], config["sell"], config["money"]
 )
 
 
+
 if __name__ == "__main__":
+    bot.add_cog(Parser(bot))
     bot.run(bot.token)
