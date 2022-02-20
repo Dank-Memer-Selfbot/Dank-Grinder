@@ -4,7 +4,7 @@
 import sys, os
 sys.path.append(os.getcwd() + "/..")
 import discord, re, random
-from .commandParsers import commandParsers
+from .commandParsers import commandParsers 
 from typing import Union, Dict, Any
 from discord.ext import commands
 import yaml
@@ -99,13 +99,7 @@ class Parser(commands.Cog):
 
             if "pm" in command:
                 # TODO: Complete and move to postmemes.py
-                print("PM")
-                # Parsing pm command
-                description = embed.description
-                # Description example
-                # Pick a meme to post to the internet!
-                index = random.randint(0, 4)
-                await message.components[0].children[index].click()
+                data = await commandParsers.pm(embed,data, message, self.bot)
                 return
 
         else:
