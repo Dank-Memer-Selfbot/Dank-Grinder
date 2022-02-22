@@ -2,9 +2,10 @@
 
 # pylint: disable=invalid-name, line-too-long, wrong-import-order, wrong-import-position, multiple-imports
 import sys, os
+
 sys.path.append(os.getcwd() + "/..")
 import discord, re, random
-from .commandParsers import commandParsers 
+from .commandParsers import commandParsers
 from typing import Union, Dict, Any
 from discord.ext import commands
 import yaml
@@ -99,7 +100,7 @@ class Parser(commands.Cog):
 
             if "pm" in command:
                 # TODO: Complete and move to postmemes.py
-                data = await commandParsers.pm(embed,data, message, self.bot)
+                data = await commandParsers.pm(embed, data, message, self.bot)
                 return
 
         else:
@@ -134,6 +135,13 @@ class Parser(commands.Cog):
                 data = commandParsers.fish(data, message)
                 convertedData = _converter(data)
                 self.bot.dispatch("dank_fish", convertedData)
+                return
+
+            # Hunting
+            if "hunt" in command:
+                data = commandParsers.hunt(data, message)
+                convertedData = _converter(data)
+                self.bot.dispatch("dank_hunt", convertedData)
                 return
 
 
